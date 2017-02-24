@@ -22,6 +22,7 @@
 #include <assert.h>
 #include <omp.h>
 #include <math.h>
+#include<x86intrin.h>
 
 /* the following two definitions of DEBUGGING control whether or not
    debugging information is written out. To put the program into
@@ -118,7 +119,7 @@ struct timeval seedtime;
   /* use the microsecond part of the current time as a pseudorandom seed */
   gettimeofday(&seedtime, NULL);
   seed = seedtime.tv_usec;
-  srandom(seed);
+  srand(seed);
 
   /* fill the matrix with random numbers */
   const int range = 1 << 16; // 2^16
@@ -129,10 +130,10 @@ struct timeval seedtime;
       for ( k = 0; k < dim2; k++ ) {
 	for ( l = 0; l < dim3; l++ ) {
 	  // generate uniform random integer with mean of zero
-	  long long rand = random();
+	  long long randval = rand();
 	  // now cut down the range and bias the mean to reduce
 	  // the likelihood of large floating point round-off errors
-	  int reduced_range = (rand % range);
+	  int reduced_range = (randval % range);
 	  float num = (((float) reduced_range) / ((float) bias))+offset;
 	  result[i][j][k][l] = num;
 	}
@@ -215,10 +216,10 @@ void team_conv(float *** image, float **** kernels, float *** output,
 	       int width, int height, int nchannels, int nkernels,
 	       int kernel_order)
 {
-  // this call here is just dummy code
-  // insert your own code instead
-  multichannel_conv(image, kernels, output, width,
-		    height, nchannels, nkernels, kernel_order);
+
+    /**
+     * our code goes here
+     */
 }
 
 int main(int argc, char ** argv)
