@@ -223,33 +223,39 @@ void multichannel_conv(float *** image, float **** kernels, float *** output,
   }
 }
 
+void transpose(double **A, double **B, int n) {
+    int i,j;
+    for(i=0; i<n; i++) {
+        for(j=0; j<n; j++) {
+            B[j*n+i] = A[i*n+j];
+        }
+    }
+}
+
 
 /* the fast version of matmul written by the team */
 void team_conv(float *** image, float **** kernels, float *** output,
                int width, int height, int nchannels, int nkernels,
                int kernel_order)
 {
-	#pragma omp parallel
-	{
-		int h,w,m,c,x,y;
-		#pragma omp for
-		for ( m = 0; m < nkernels; m++ ) {  
-		   for ( w = 0; w < width; w++ )   {
-		     for ( h = 0; h < height; h++ )  {
+		
+		for (int m = 0; m < nkernels; m++ ) { 
+		  #pragma omp parallel for 
+		   for (int w = 0; w < width; w++ )   {
+		     for (int h = 0; h < height; h++ )  {
 			double sum = 0.0;
-			for ( c = 0; c < nchannels; c++ ) {
-			  for ( x = 0; x < kernel_order; x++) {
-			    for ( y = 0; y < kernel_order; y++ ) {
+			for (int c = 0; c < nchannels; c++ ) {
+			  for (int x = 0; x < kernel_order; x++) {
+			    for (int y = 0; y < kernel_order; y++ ) {
 			      sum += image[w+x][h+y][c] * kernels[m][c][x][y];
 			    }
 			  }
-		          #pragma omp barrier
 			  output[m][w][h] = sum;
 			}
 		    }
 		}
 	   }
-  	}
+  	
 	/*
 	multichannel_conv(image, kernels, output, width, height, nchannels, nkernels, kernel_order);	
 
@@ -264,7 +270,6 @@ void team_conv(float *** image, float **** kernels, float *** output,
 	*/
 	
 }
-
 
 
 int main(int argc, char ** argv)
